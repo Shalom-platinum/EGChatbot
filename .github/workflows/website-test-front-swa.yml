@@ -51,6 +51,7 @@ on:
   push:
     branches:
       - 'aaa/XXXXX'
+      - 'main'
   workflow_dispatch:
 
 jobs:
@@ -65,7 +66,7 @@ jobs:
           submodules: true
       - name: Check SWA token presence
         env:
-          SWA_TOKEN: ${{ secrets.EYEMASTERS_SWA_TOKEN_CLIENT }}
+          SWA_TOKEN: ${{ secrets.EGCHATBOT_SWA_TOKEN_CLIENT }}
         run: |
           if [ -z "$SWA_TOKEN" ]; then
             echo "❌ SWA token is MISSING"
@@ -77,7 +78,7 @@ jobs:
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.EYEMASTERS_SWA_TOKEN_CLIENT }}
+          azure_static_web_apps_api_token: ${{ secrets.EGCHATBOT_SWA_TOKEN_CLIENT }}
           # repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for GitHub integrations (i.e. PR comments)
           action: "upload"
           ###### Repository/Build Configurations ######
