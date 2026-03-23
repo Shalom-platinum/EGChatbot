@@ -179,10 +179,9 @@ app.UseCors("AllowFrontend");
 // Note: HTTPS redirection not needed - Azure Container Apps handles SSL termination at ingress
 // The container receives HTTP traffic on port 8080
 
-// Add authentication and authorization middleware
-app.UseAuthentication();
-app.UseAuthorization();
-
+// // Add authentication and authorization middleware
+// Add RATE LIMITING
+// ADD TOKEN LIMIT MAX PER ANONYMOUS/GUEST ID
 
 
 
@@ -192,24 +191,14 @@ app.UseAuthorization();
 app.MapPost("/api/chat/stream", async (
     ChatRequest request,
     AgentFrameworkService agentService,
-    // AgentPlaywrightService playService,
-
     HttpContext httpContext,
     IHostEnvironment environment,
     CancellationToken cancellationToken) =>
 {
 
-    // SERVER SIDE EVENT;
-    // UI - 1 REQUEST
-    // BACKEND - RESPOND IN CHUNKS (STREAM) 
-    // NESTJS x EXPRESSJS
-    // WEBSOCKET
     try
     {
-        httpContext.Response.Headers.Append("Content-Type", "text/event-stream"); // SSE
-        httpContext.Response.Headers.Append("Cache-Control", "no-cache"); // SSE
-        httpContext.Response.Headers.Append("Connection", "keep-alive"); // SSE
-
+    
         // Extract the user's JWT token from the Authorization header
         var authHeader = httpContext.Request.Headers["Authorization"].ToString();
         var userAccessToken = authHeader.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase);
