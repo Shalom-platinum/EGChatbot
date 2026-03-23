@@ -1,0 +1,95 @@
+on:
+  workflow_call:
+    inputs:
+      grifClient:
+        required: true
+        type: string
+      grifEnvironment:
+        required: true
+        type: string
+      grifLoginMode:
+        required: true
+        type: string
+      GrifProjName:
+        required: true
+        type: string
+      GrifSvcName:
+        required: true
+        type: string
+    secrets:
+      GRIF_HOST_AZPRIN:
+        required: true
+      GRIF_HOST_AZPWD:
+        required: true
+
+env:
+  EYEMASTERSITE_PROJDIR: ${{ github.workspace }}
+  EYEMASTERSITE_SCRIPTDIR: ${{ github.workspace }}/scripts
+  EYEMASTERSITE_CONFIG_NETFXDIR: ${{ github.workspace }}/src-net/Config
+  EYEMASTERSITE_CONFIG_NODEJSDIR: ${{ github.workspace }}/src-node/_params
+  EYEMASTERSITE_BUILDID: ${{ github.run_id }}
+  grifBuildNumber: ${{ github.run_number }}
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  disable.coverage.autogenerate: 'true'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'code checkout'
+        uses: actions/checkout@v4
+
+      - name: 'testing environment variables'
+        shell: pwsh
+        run: |
+          echo "grifClient -> ${{ inputs.grifClient }}"
+          echo "EYEMASTERSITE_PROJDIR -> $EYEMASTERSITE_PROJDIR"
+          echo "EYEMASTERSITE_SCRIPTDIR -> $env.EYEMASTERSITE_SCRIPTDIR"
+          echo "EYEMASTERSITE_CONFIG_NETFXDIR -> $env.EYEMASTERSITE_CONFIG_NETFXDIR"
+          echo "EYEMASTERSITE_CONFIG_NODEJSDIR -> $env.EYEMASTERSITE_CONFIG_NODEJSDIR"
+          echo "EYEMASTERSITE_BUILDID -> $env.EYEMASTERSITE_BUILDID"
+          echo "grifBuildNumber -> $env.grifBuildNumber"
+        env:
+          NugetPassword: ${{ secrets.NugetPassword }}
+          EYEMASTERSITE_PROJDIR: ${{ env.EYEMASTERSITE_PROJDIR }}
+          EYEMASTERSITE_SCRIPTDIR: ${{ env.EYEMASTERSITE_SCRIPTDIR }}
+          EYEMASTERSITE_CONFIG_NETFXDIR: ${{ env.EYEMASTERSITE_CONFIG_NETFXDIR }}
+          EYEMASTERSITE_CONFIG_NODEJSDIR: ${{ env.EYEMASTERSITE_CONFIG_NODEJSDIR }}
+          EYEMASTERSITE_BUILDID: ${{ env.EYEMASTERSITE_BUILDID }}
+
+      - name: 'Build NodeJs DockerImage ${{ inputs.GrifProjName }}'
+        shell: pwsh
+        run: ${{ env.EYEMASTERSITE_SCRIPTDIR }}/ProjDockerBuildNodeJs.ps1 -GrifProjName ${{ inputs.GrifProjName }} -GrifEnvironment ${{ inputs.grifEnvironment }}
+        env:
+          grifClient: ${{ inputs.grifClient }}
+          GRIF_HOST_AZPRIN: ${{ secrets.GRIF_HOST_AZPRIN }}
+          GRIF_HOST_AZPWD: ${{ secrets.GRIF_HOST_AZPWD }}
+          NugetPassword: ${{ secrets.NugetPassword }}
+          EYEMASTERSITE_PROJDIR: ${{ env.EYEMASTERSITE_PROJDIR }}
+          EYEMASTERSITE_SCRIPTDIR: ${{ env.EYEMASTERSITE_SCRIPTDIR }}
+          EYEMASTERSITE_CONFIG_NETFXDIR: ${{ env.EYEMASTERSITE_CONFIG_NETFXDIR }}
+          EYEMASTERSITE_CONFIG_NODEJSDIR: ${{ env.EYEMASTERSITE_CONFIG_NODEJSDIR }}
+          EYEMASTERSITE_BUILDID: ${{ env.EYEMASTERSITE_BUILDID }}
+          grifBuildNumber: ${{ env.grifBuildNumber }}
+          buildPlatform: ${{ env.buildPlatform }}
+          buildConfiguration: ${{ env.buildConfiguration }}
+          disable.coverage.autogenerate: ${{ env['disable.coverage.autogenerate'] }}
+
+      - name: 'Deploy App (${{ inputs.GrifSvcName }}, ${{ inputs.GrifProjName }}) to ${{ inputs.grifEnvironment }}'
+        shell: pwsh
+        run: ${{ env.EYEMASTERSITE_SCRIPTDIR }}/ProjAksUpdateFront.ps1 -GrifEnvironment ${{ inputs.grifEnvironment }} -GrifProjName ${{ inputs.GrifProjName }} -GrifSvcName ${{ inputs.GrifSvcName }} -GrifLoginMode ${{ inputs.grifLoginMode }} -GrifPushBuild
+        env:
+          grifClient: ${{ inputs.grifClient }}
+          GRIF_HOST_AZPRIN: ${{ secrets.GRIF_HOST_AZPRIN }}
+          GRIF_HOST_AZPWD: ${{ secrets.GRIF_HOST_AZPWD }}
+          NugetPassword: ${{ secrets.NugetPassword }}
+          EYEMASTERSITE_PROJDIR: ${{ env.EYEMASTERSITE_PROJDIR }}
+          EYEMASTERSITE_SCRIPTDIR: ${{ env.EYEMASTERSITE_SCRIPTDIR }}
+          EYEMASTERSITE_CONFIG_NETFXDIR: ${{ env.EYEMASTERSITE_CONFIG_NETFXDIR }}
+          EYEMASTERSITE_CONFIG_NODEJSDIR: ${{ env.EYEMASTERSITE_CONFIG_NODEJSDIR }}
+          EYEMASTERSITE_BUILDID: ${{ env.EYEMASTERSITE_BUILDID }}
+          grifBuildNumber: ${{ env.grifBuildNumber }}
+          buildPlatform: ${{ env.buildPlatform }}
+          buildConfiguration: ${{ env.buildConfiguration }}
+          disable.coverage.autogenerate: ${{ env['disable.coverage.autogenerate'] }}

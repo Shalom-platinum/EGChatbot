@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+		
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <EnablePreviewFeatures>true</EnablePreviewFeatures>
+
+        <LangVersion>13.0</LangVersion>
+
+		<!-- <NoWarn>$(NoWarn);NU1701;CS0109;CS0162;CS0168;CS1573;CS1574;CS1591;CS1998;CA2252;SYSLIB0021;SYSLIB0051</NoWarn>
+
+		<WarningsAsErrors>$(WarningsAsErrors);CA2012;CA2022;CS0108;CS4014</WarningsAsErrors> -->
+
+		<OutputType>Library</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Azure.Communication.Email" Version="1.0.2" />
+        <!-- <PackageReference Include="BusAppCore.CommandQuery" Version="1.58.0-preview.53" />
+        <PackageReference Include="BusAppCore.DataServices" Version="1.58.0-preview.53" /> -->
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- <ProjectReference Include="..\EyeMaster.Domain\EyeMaster.Domain.csproj" /> -->
+        <!-- <ProjectReference Include="..\EGChatbot.Common\EGChatbot.Common.csproj" /> -->
+    </ItemGroup>
+
+</Project>

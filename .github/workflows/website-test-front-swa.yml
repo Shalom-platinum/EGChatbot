@@ -1,0 +1,86 @@
+# name: Test - Website Backend on AppService
+
+# on:
+#   workflow_dispatch:
+#   push:
+#     branches:
+#       - "XXX"
+#       - 'AAA/**'
+#   pull_request:
+#     branches:
+#       - "XXX"
+#       - 'AAA/**'
+
+# jobs:
+#   build-and-deploy:
+#     environment: Develop
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+
+#       - name: Setup .NET
+#         uses: actions/setup-dotnet@v4
+#         with:
+#           dotnet-version: '9.0.300'  # or your target version
+
+#       - name: Restore dependencies
+#         run: |
+#           dotnet restore ./src-net/EGChatbot.Api/EGChatbot.Api.csproj
+
+
+#       - name: Build
+#         run: |
+#           dotnet build ./src-net/EGChatbot.Api/EGChatbot.Api.csproj --configuration Release --no-restore
+
+#       - name: Publish to folder
+#         run: dotnet publish ./src-net/EGChatbot.Api/EGChatbot.Api.csproj  -c Release -o ./src-net/publish
+
+#       - name: Deploy to Azure Web App
+#         uses: azure/webapps-deploy@v3
+#         with:
+#           app-name: 'eyemasters-api'
+#           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+#           package: ./src-net/publish
+
+
+
+name: Azure Static Web Apps CI/CD - Eyemasters UI (TEST)
+on:
+  push:
+    branches:
+      - 'aaa/XXXXX'
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy_job:
+    # if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    environment: Develop
+    name: Build and Deploy Job
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Check SWA token presence
+        env:
+          SWA_TOKEN: ${{ secrets.EYEMASTERS_SWA_TOKEN_CLIENT }}
+        run: |
+          if [ -z "$SWA_TOKEN" ]; then
+            echo "❌ SWA token is MISSING"
+            exit 1
+          else
+            echo "✅ SWA token is PRESENT"
+          fi
+      - name: Build And Deploy
+        id: builddeploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.EYEMASTERS_SWA_TOKEN_CLIENT }}
+          # repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for GitHub integrations (i.e. PR comments)
+          action: "upload"
+          ###### Repository/Build Configurations ######
+          app_location: "src-node/eyemasters-site" # App source code path relative to repository root
+          output_location: "dist" # Built app content directory, relative to app_location - optional
+          ###### End of Repository/Build Configurations ######

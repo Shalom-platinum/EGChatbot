@@ -1,0 +1,27 @@
+name: Test - Website Backend
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "XXX"
+      - 'AAA/**'
+  pull_request:
+    branches:
+      - "XXX"
+      - 'AAA/**'
+
+
+jobs:
+  build_and_deploy:
+    uses: ./.github/workflows/_cd-site-back.yml
+    with:
+      grifClient: 'EYEMASTERS'
+      grifEnvironment: 'Test'
+      grifLoginMode: 'SVCPRIN'
+      GrifProjName: 'EGChatbot.Api'
+      GrifSvcName: 'website'
+    secrets:
+      GRIF_HOST_AZPRIN: ${{ secrets.OPMAD911AZPRIN }}
+      GRIF_HOST_AZPWD: ${{ secrets.OPMAD911AZPWD }}
+      DOCKER_SECRET_ENV: ${{ secrets.DOCKER_SECRET_ENV }}

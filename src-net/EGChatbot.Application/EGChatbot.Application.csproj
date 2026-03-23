@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+		
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <EnablePreviewFeatures>true</EnablePreviewFeatures>
+
+        <LangVersion>13.0</LangVersion>
+        <EnablePreviewFeatures>true</EnablePreviewFeatures>
+
+		<NoWarn>$(NoWarn);NU1701;CS0109;CS0162;CS0168;CS1573;CS1574;CS1591;CS1998;CA2252;SYSLIB0021;SYSLIB0051</NoWarn>
+
+		<WarningsAsErrors>$(WarningsAsErrors);CA2012;CA2022;CS0108;CS4014</WarningsAsErrors>
+
+		<OutputType>Library</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Azure.Communication.Email" Version="1.0.2" />
+        <!-- <PackageReference Include="BusAppCore.CommandQuery" Version="1.58.0-preview.53" />
+        <PackageReference Include="BusAppCore.DataServices" Version="1.58.0-preview.53" /> -->
+
+
+           <PackageReference Include="Azure.AI.OpenAI" Version="2.1.0" />
+    <PackageReference Include="Azure.AI.Projects" Version="1.2.0-beta.5" />
+    <PackageReference Include="Azure.Identity" Version="1.17.1" />
+    <PackageReference Include="Microsoft.Agents.AI.AzureAI" Version="1.0.0-preview.260108.1" />
+    <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.0.0-rc2" />
+    <!-- <PackageReference Include="Microsoft.Extensions.AI.MCP" Version="9.0.0-rc.1.24570.2" /> -->
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.47.0" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="4.3.0" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+        <!-- <PackageReference Include="Microsoft.SemanticKernel" Version="1.70.0" /> -->
+        <PackageReference Include="Microsoft.SemanticKernel.Plugins.OpenApi" Version="1.70.0" />
+        <PackageReference Include="ModelContextProtocol" Version="1.1.0" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.12.18" />
+
+
+
+
+        <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.1.0" />
+    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="10.1.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- <ProjectReference Include="..\EyeMaster.Domain\EyeMaster.Domain.csproj" /> -->
+        <ProjectReference Include="..\EGChatbot.Common\EGChatbot.Common.csproj" />
+    </ItemGroup>
+
+</Project>
