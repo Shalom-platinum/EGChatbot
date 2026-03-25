@@ -1,0 +1,41 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "/opt/homebrew/bin/dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/src-net/EGChatbot.Api/EGChatbot.Api.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "command": "/opt/homebrew/bin/dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/src-net/EGChatbot.Api/EGChatbot.Api.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch",
+            "command": "/opt/homebrew/bin/dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/src-net/EGChatbot.Api/EGChatbot.Api.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}

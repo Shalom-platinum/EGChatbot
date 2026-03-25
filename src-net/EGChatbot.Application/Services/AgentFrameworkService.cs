@@ -11,13 +11,7 @@ using EGChatbot.Common.Models;
 // using WebApp.Api.Models;
 using Azure.AI.Projects;
 using Azure.AI.Projects.OpenAI;
-using OpenAI.Chat;
-using Microsoft.Extensions.AI;
-using System.ClientModel;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Plugins.OpenApi;
-using OpenAI;
-using Azure;
+ 
 namespace EGChatbot.Application.Services;
 
 #pragma warning disable OPENAI001
@@ -49,25 +43,48 @@ public class AgentFrameworkService : IDisposable
     private ResponseTokenUsage? _lastUsage;
     public AgentFrameworkService(
         IConfiguration _configuration,
+        IHostEnvironment hostEnvironment,
         ILogger<AgentFrameworkService> _logger)
     {
         logger = _logger;
-        var endpoint = _configuration["AI_AGENT_ENDPOINT"]
-            ?? throw new InvalidOperationException("AI_AGENT_ENDPOINT is not configured");
-        modelDeploymentName = _configuration["MODEL_DEPLOYMENT_NAME"]
-                ?? throw new InvalidOperationException("MODEL_DEPLOYMENT_NAME is not configured");
-        agentId = _configuration["AI_AGENT_ID"]
-            ?? throw new InvalidOperationException("AI_AGENT_ID is not configured");
+        var endpoint = GetRequiredSetting(_configuration, "AI_AGENT_ENDPOINT");
+        modelDeploymentName = GetRequiredSetting(_configuration, "MODEL_DEPLOYMENT_NAME");
+        agentId = GetRequiredSetting(_configuration, "AI_AGENT_ID");
 
         logger.LogDebug(
             "Initializing AgentFrameworkService: endpoint={Endpoint}, agentId={AgentId}",
             endpoint,
             agentId);
 
+        TokenCredential credential;
+ 
+        if (hostEnvironment.IsDevelopment())
+        {
+            _logger.LogInformation("Development: Using ChainedTokenCredential (AzureCli -> AzureDeveloperCli)");
+            credential = new ChainedTokenCredential(
+                new AzureCliCredential(),
+                new AzureDeveloperCliCredential()
+            );
+        }
+        else
+        {
+            _logger.LogInformation("Production: Using ManagedIdentityCredential (system-assigned)");
+            credential = new ManagedIdentityCredential();
+        }
 
-        var environment = _configuration["ASPNETCORE_ENVIRONMENT"] ?? "Production";
-        projectClient = new AIProjectClient(new Uri(endpoint), new DefaultAzureCredential());
+        projectClient = new AIProjectClient(new Uri(endpoint), credential);
         logger.LogInformation("AIProjectClient initialized successfully");
+    }
+
+    private static string GetRequiredSetting(IConfiguration configuration, string key)
+    {
+        var value = configuration[key];
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new InvalidOperationException($"{key} is not configured");
+        }
+
+        return value;
     }
 
 
@@ -189,8 +206,6 @@ public class AgentFrameworkService : IDisposable
 
         logger.LogInformation("Completed streaming for conversation: {ConversationId}", conversationId);
     }
-
-
 
 
     /// <summary>

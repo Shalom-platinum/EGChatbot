@@ -258,6 +258,10 @@ $RECYCLE.BIN/
 
 # Custom
 # /.dockerignore
+
+# App configuration secrets
+**/appsettings.json
+**/appsettings.*.json
 # /Griffin.BOS.Host.DOCKERFILE
 # /Griffin.BOS.WebApi.DOCKERFILE
 # /Hydra.Web.DOCKERFILE

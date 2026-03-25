@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using EGChatbot.Api.ModuleEndpoints;
 using EGChatbot.Api.Writers;
 using EGChatbot.Application.Services;
 using EGChatbot.Common.Models;
@@ -74,26 +75,26 @@ if (!string.IsNullOrEmpty(tenantId))
     builder.Configuration["AzureAd:TenantId"] = tenantId;
 }
 
-const string RequiredScope = "Chat.ReadWrite";
-const string ScopePolicyName = "RequireChatScope";
+// const string RequiredScope = "Chat.ReadWrite";
+// const string ScopePolicyName = "RequireChatScope";
 
-// Add Microsoft Identity Web authentication
-// Validates JWT bearer tokens issued for the SPA's delegated scope
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(options =>
-    {
-        builder.Configuration.Bind("AzureAd", options);
-        var configuredClientId = builder.Configuration["AzureAd:ClientId"];
+// // Add Microsoft Identity Web authentication
+// // Validates JWT bearer tokens issued for the SPA's delegated scope
+// // builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+// //     .AddMicrosoftIdentityWebApi(options =>
+// //     {
+// //         builder.Configuration.Bind("AzureAd", options);
+// //         var configuredClientId = builder.Configuration["AzureAd:ClientId"];
 
-        options.TokenValidationParameters.ValidAudiences = new[]
-        {
-            configuredClientId,
-            $"api://{configuredClientId}"
-        };
+// //         options.TokenValidationParameters.ValidAudiences = new[]
+// //         {
+// //             configuredClientId,
+// //             $"api://{configuredClientId}"
+// //         };
 
-        options.TokenValidationParameters.NameClaimType = ClaimTypes.Name;
-        options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
-    }, options => builder.Configuration.Bind("AzureAd", options));
+// //         options.TokenValidationParameters.NameClaimType = ClaimTypes.Name;
+// //         options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
+// //     }, options => builder.Configuration.Bind("AzureAd", options));
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -169,6 +170,7 @@ app.UseStatusCodePages();
 
 // Map health checks
 app.MapDefaultEndpoints();
+app.MapChatEndpoints();
 
 // Serve static files from wwwroot (frontend)
 app.UseDefaultFiles();
@@ -183,100 +185,6 @@ app.UseCors("AllowFrontend");
 // Add RATE LIMITING
 // ADD TOKEN LIMIT MAX PER ANONYMOUS/GUEST ID
 
-
-
-
-// Streaming Chat endpoint: Streams agent response via SSE (conversationId → chunks → usage → done)
-// Supports MCP tool approval flow with previousResponseId and mcpApproval parameters
-app.MapPost("/api/chat/stream", async (
-    ChatRequest request,
-    AgentFrameworkService agentService,
-    HttpContext httpContext,
-    IHostEnvironment environment,
-    CancellationToken cancellationToken) =>
-{
-
-    try
-    {
-    
-        // Extract the user's JWT token from the Authorization header
-        var authHeader = httpContext.Request.Headers["Authorization"].ToString();
-        var userAccessToken = authHeader.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase);
-
-        if (string.IsNullOrEmpty(userAccessToken))
-        {
-            await SSEEventWriters.WriteErrorEvent(
-                httpContext.Response,
-                "Missing or invalid Authorization header",
-                cancellationToken);
-            return;
-        }
-
-
-        var conversationId = request.ConversationId
-            ?? await agentService.CreateConversationAsync(request.Message, cancellationToken);
-
-        await SSEEventWriters.WriteConversationIdEvent(httpContext.Response, conversationId, cancellationToken);
-
-        var startTime = DateTime.UtcNow;
-
-        await foreach (var chunk in agentService.StreamMessageAsync(conversationId, request.Message
-, cancellationToken: cancellationToken))
-        {
-            if (chunk.IsText && chunk.TextDelta != null)
-            {
-                await SSEEventWriters.WriteChunkEvent(httpContext.Response, chunk.TextDelta, cancellationToken);
-            }
-            else if (chunk.HasAnnotations && chunk.Annotations != null)
-            {
-                await SSEEventWriters.WriteAnnotationsEvent(httpContext.Response, chunk.Annotations, cancellationToken);
-            }
-            else if (chunk.IsMcpApprovalRequest && chunk.McpApprovalRequest != null)
-            {
-                await SSEEventWriters.WriteMcpApprovalRequestEvent(httpContext.Response, chunk.McpApprovalRequest, cancellationToken);
-            }
-        }
-
-        var duration = (DateTime.UtcNow - startTime).TotalMilliseconds;
-        var usage = agentService.GetLastUsage();
-        await SSEEventWriters.WriteUsageEvent(
-            httpContext.Response,
-            duration,
-            usage?.InputTokens ?? 0,
-            usage?.OutputTokens ?? 0,
-            usage?.TotalTokens ?? 0,
-            cancellationToken);
-
-        await SSEEventWriters.WriteDoneEvent(httpContext.Response, cancellationToken);
-    }
-    catch (ArgumentException ex) when (ex.Message.Contains("Invalid") && (ex.Message.Contains("attachments") || ex.Message.Contains("image") || ex.Message.Contains("file")))
-    {
-        // Validation errors from image/file processing - return 400 Bad Request
-        var errorResponse = ErrorResponseFactory.CreateFromException(
-            ex,
-            400,
-            environment.IsDevelopment());
-
-        await SSEEventWriters.WriteErrorEvent(
-            httpContext.Response,
-            errorResponse.Detail ?? errorResponse.Title,
-            cancellationToken);
-    }
-    catch (Exception ex)
-    {
-        var errorResponse = ErrorResponseFactory.CreateFromException(
-            ex,
-            500,
-            environment.IsDevelopment());
-
-        await SSEEventWriters.WriteErrorEvent(
-            httpContext.Response,
-            errorResponse.Detail ?? errorResponse.Title,
-            cancellationToken);
-    }
-})
-// .RequireAuthorization(ScopePolicyName)
-.WithName("StreamChatMessage");
 
 
 

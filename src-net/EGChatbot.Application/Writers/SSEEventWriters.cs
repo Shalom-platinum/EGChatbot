@@ -6,7 +6,7 @@ using System.Text.Json;
 using OpenAI.Assistants;
 using EGChatbot.Common.Models;
 
-namespace EGChatbot.Api.Writers
+namespace EGChatbot.Application.Writers
 {
 #pragma warning disable OPENAI001
 
