@@ -1,57 +1,11 @@
-# name: Test - Website Backend on AppService
-
-# on:
-#   workflow_dispatch:
-#   push:
-#     branches:
-#       - "XXX"
-#       - 'AAA/**'
-#   pull_request:
-#     branches:
-#       - "XXX"
-#       - 'AAA/**'
-
-# jobs:
-#   build-and-deploy:
-#     environment: Develop
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v4
-
-#       - name: Setup .NET
-#         uses: actions/setup-dotnet@v4
-#         with:
-#           dotnet-version: '9.0.300'  # or your target version
-
-#       - name: Restore dependencies
-#         run: |
-#           dotnet restore ./src-net/EGChatbot.Api/EGChatbot.Api.csproj
-
-
-#       - name: Build
-#         run: |
-#           dotnet build ./src-net/EGChatbot.Api/EGChatbot.Api.csproj --configuration Release --no-restore
-
-#       - name: Publish to folder
-#         run: dotnet publish ./src-net/EGChatbot.Api/EGChatbot.Api.csproj  -c Release -o ./src-net/publish
-
-#       - name: Deploy to Azure Web App
-#         uses: azure/webapps-deploy@v3
-#         with:
-#           app-name: 'eyemasters-api'
-#           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-#           package: ./src-net/publish
-
-
-
-name: Azure Static Web Apps CI/CD - Eyemasters UI (TEST)
+ 
+name: Azure Static Web Apps CI/CD - EG Group Chat UI (TEST)
 on:
   push:
     branches:
       - 'aaa/XXXXX'
       - 'main'
+      # - 'feat/abdulmalik_20260325_ui_api_rework'
   workflow_dispatch:
 
 jobs:
@@ -74,14 +28,27 @@ jobs:
           else
             echo "✅ SWA token is PRESENT"
           fi
+      - name: Install and build frontend
+        working-directory: src-node
+        run: |
+          npm install --legacy-peer-deps
+          npm run build
+          cp staticwebapp.config.json dist/staticwebapp.config.json
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.EGCHATBOT_SWA_TOKEN_CLIENT }}
-          # repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for GitHub integrations (i.e. PR comments)
           action: "upload"
-          ###### Repository/Build Configurations ######
-          app_location: "src-node/eyemasters-site" # App source code path relative to repository root
-          output_location: "dist" # Built app content directory, relative to app_location - optional
-          ###### End of Repository/Build Configurations ######
+          app_location: "src-node/dist" # Prebuilt app artifacts path
+          skip_app_build: true
+          output_location: "" # Not used when skip_app_build is true
+ 
+
+
+
+
+
+
+
+

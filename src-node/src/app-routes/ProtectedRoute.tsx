@@ -23,14 +23,14 @@ const ProtectedRoute = ({navigateTo, condition, isLoading}: {
     return (
 
         <Fragment>
-            <AuthenticatedTemplate>
+            {/* <AuthenticatedTemplate> */}
                 <DashboardContainer>
                     <Outlet/>
                 </DashboardContainer>
-            </AuthenticatedTemplate>
-            <UnauthenticatedTemplate>
+            {/* </AuthenticatedTemplate> */}
+            {/* <UnauthenticatedTemplate>
                 <Navigate to={navigateTo} replace={true}/>
-            </UnauthenticatedTemplate>
+            </UnauthenticatedTemplate> */}
         </Fragment>
     )
 

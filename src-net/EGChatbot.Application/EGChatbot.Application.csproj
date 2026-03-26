@@ -50,7 +50,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <!-- <ProjectReference Include="..\EyeMaster.Domain\EyeMaster.Domain.csproj" /> -->
+        <ProjectReference Include="..\EGChatbot.Domain\EGChatbot.Domain.csproj" />
         <ProjectReference Include="..\EGChatbot.Common\EGChatbot.Common.csproj" />
     </ItemGroup>
 

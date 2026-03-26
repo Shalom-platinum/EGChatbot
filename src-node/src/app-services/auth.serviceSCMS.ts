@@ -1,12 +1,12 @@
 // Or from '@reduxjs/toolkit/query/react'
 import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
-import { API_KEY, baseURL2 } from '@/app-config/api.config';
+import { API_KEY, baseURL } from '@/app-config/api.config';
 import { loginRequest, msalInstance } from '@/app-config/msalConfig';
 import { AuthCacheHelpers } from '@/app-framework/AuthCacheHelpers';
 
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: baseURL2,
+    baseUrl: baseURL,
     prepareHeaders: async (headers) => {
         try {
             const accessToken = await AuthCacheHelpers.refreshAuth();

@@ -1,18 +1,21 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { api } from '@/app-services';
 import { SCMSapi } from '@/app-services/auth.serviceSCMS';
-import userSlice from './user.slice';
-import { authSlice } from './auth.slice';
+import chatReducer from './chat.slice';
+import { chatPersistenceMiddleware } from './chatPersistence';
+// import userSlice from './user.slice';
+// import { authSlice } from './auth.slice';
 
 export const store = configureStore({
   reducer: {
+    chat: chatReducer,
     [api.reducerPath]: api.reducer,
     [SCMSapi.reducerPath]: SCMSapi.reducer,
-    auth: authSlice.reducer,
-    user: userSlice.reducer
+    // auth: authSlice.reducer,
+    // user: userSlice.reducer
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(api.middleware, SCMSapi.middleware) //.concat(qapi2.middleware)
+    getDefaultMiddleware().concat(chatPersistenceMiddleware, api.middleware, SCMSapi.middleware) //.concat(qapi2.middleware)
 })
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Threading.RateLimiting;
 using EGChatbot.Api.ModuleEndpoints;
 using EGChatbot.Api.Writers;
 using EGChatbot.Application.Services;
@@ -6,6 +7,8 @@ using EGChatbot.Common.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
+using EGChatbot.Domain.Data;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +28,25 @@ builder.Services.AddProblemDetails();
 // Configure CORS for local development and production
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
     ?? new[] { "http://localhost:8080" };
+
+// Add Rate Limiting
+builder.Services.AddRateLimiter(options =>
+{
+    // Configure the response when a limit is hit
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    // Define a policy named "IpSafe"
+    options.AddPolicy("IpSafe", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            // Use the remote IP address as the unique key (partition)
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,             // Max 5 requests
+                Window = TimeSpan.FromSeconds(1), // Per 1 second
+                QueueLimit = 0               // Do not queue; reject immediately
+            }));
+});
 
 builder.Services.AddCors(options =>
 {
@@ -55,6 +77,10 @@ builder.Services.AddCors(options =>
     });
 });
 
+
+builder.Services.AddDbContext<ApplicationDbContext>();
+
+
 // Override ClientId and TenantId from environment variables if provided
 // These will be set by azd during deployment or by AppHost in local dev
 var clientId = builder.Configuration["ENTRA_SPA_CLIENT_ID"]
@@ -74,28 +100,6 @@ if (!string.IsNullOrEmpty(tenantId))
 {
     builder.Configuration["AzureAd:TenantId"] = tenantId;
 }
-
-// const string RequiredScope = "Chat.ReadWrite";
-// const string ScopePolicyName = "RequireChatScope";
-
-// // Add Microsoft Identity Web authentication
-// // Validates JWT bearer tokens issued for the SPA's delegated scope
-// // builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-// //     .AddMicrosoftIdentityWebApi(options =>
-// //     {
-// //         builder.Configuration.Bind("AzureAd", options);
-// //         var configuredClientId = builder.Configuration["AzureAd:ClientId"];
-
-// //         options.TokenValidationParameters.ValidAudiences = new[]
-// //         {
-// //             configuredClientId,
-// //             $"api://{configuredClientId}"
-// //         };
-
-// //         options.TokenValidationParameters.NameClaimType = ClaimTypes.Name;
-// //         options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
-// //     }, options => builder.Configuration.Bind("AzureAd", options));
-
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -171,6 +175,7 @@ app.UseStatusCodePages();
 // Map health checks
 app.MapDefaultEndpoints();
 app.MapChatEndpoints();
+app.MapSessionEndpoints();
 
 // Serve static files from wwwroot (frontend)
 app.UseDefaultFiles();
@@ -192,7 +197,7 @@ app.UseCors("AllowFrontend");
 app.MapFallbackToFile("index.html");
 
 // Configure Kestrel to listen on the configured port
-var port = builder.Configuration["PORT"] ?? "5000";
+var port = builder.Configuration["PORT"] ?? "5232";
 
 
 
@@ -219,5 +224,16 @@ app.MapScalarApiReference(options =>
     };
 });
 
+   if (app.Environment.IsProduction())
+    {
+        // Use HSTS
+        app.UseHsts();
 
+        // Run Migration; We'll get DB Backup if anything goes wrong
+        // Or use a 2 step approach of applying to staging before production;
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate(); // apply migrations
+
+    }
 app.Run();

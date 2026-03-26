@@ -1,6 +1,7 @@
+import { ClassnameChildrenProps } from "@/app-model/BaseProps"
 import { cn } from "@/utils/utils"
 
-export const AppSpinner = ({className}) => {
+export const AppSpinner = (props: ClassnameChildrenProps) => {
     return (<svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -11,7 +12,7 @@ export const AppSpinner = ({className}) => {
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className={cn("animate-spin", className)}
+        className={cn("animate-spin", props.className)}
       >
         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
       </svg>)

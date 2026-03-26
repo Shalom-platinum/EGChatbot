@@ -2,6 +2,7 @@ namespace EGChatbot.Common.Models;
 
 public record ChatRequest
 {
+    public required string SessionId { get; init; }
     public required string Message { get; init; }
     public string? ConversationId { get; init; }
     /// <summary>

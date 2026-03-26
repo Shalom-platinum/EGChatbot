@@ -24,7 +24,6 @@ function App({ pca }: AppProps) {
         element: <ProtectedRoute navigateTo={'/login'} condition={false} isLoading={inProgress === 'login'} />,
         children: [
           ...dashboardRoutes,
-          ...authRoutes,
         ] as any[],
         errorElement: <Error />
       },

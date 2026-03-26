@@ -14,6 +14,7 @@ using Azure.AI.Projects.OpenAI;
  
 namespace EGChatbot.Application.Services;
 
+public record PublicAgentMeta (string Name, string Description, string? Logo);
 #pragma warning disable OPENAI001
 
 /// <summary>
@@ -93,6 +94,13 @@ public class AgentFrameworkService : IDisposable
         // TODO: Ensure to place a lock on this, coz it will be called many times;
         var agentDefinition = await projectClient.GetAIAgentAsync(name: agentId, cancellationToken: cancellationToken);
         return agentDefinition;
+    }
+
+       public async Task<PublicAgentMeta> GetPublicAgentMeta(CancellationToken cancellationToken)
+    {
+        // TODO: Ensure to place a lock on this, coz it will be called many times;
+        var agentDefinition =  await GetMachineAgentDefn(cancellationToken); // projectClient.GetAIAgentAsync(name: agentId, cancellationToken: cancellationToken);
+        return new (agentDefinition.Name, agentDefinition.Description,  null);
     }
 
     /// <summary>
@@ -198,8 +206,11 @@ public class AgentFrameworkService : IDisposable
             AllowBackgroundResponses = true,
         };
 
+        // Save the message sent in by the user 1st
         await foreach (var update in chatagent.RunStreamingAsync(message: message, session: session, options: options, cancellationToken: cancellationToken))
         {
+            // Save in DB as chunks are yielded;
+            // Save the message in 1 row, then aggregate the chunks into 1 content that can be saved in DB.
             yield return StreamChunk.Text(update.Text);
             Console.Write(update.Text);
         }
