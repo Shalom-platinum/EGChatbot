@@ -225,6 +225,7 @@ jobs:
 
       - name: Login to Azure
         uses: azure/login@v2
+        if: false
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
@@ -232,9 +233,9 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ github.event.inputs.azure_app_service_name }}
-          resource-group-name: ${{ github.event.inputs.azure_resource_group }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        #resource-group-name: ${{ github.event.inputs.azure_resource_group }}
 
       - name: Azure logout
         run: az logout
