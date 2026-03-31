@@ -1,11 +1,11 @@
  
 name: Azure Static Web Apps CI/CD - EG Group Chat UI (TEST)
 on:
-  push:
-    branches:
-      - 'aaa/XXXXX'
-      - 'main'
-      # - 'feat/abdulmalik_20260325_ui_api_rework'
+  # push:
+  #   branches:
+  #     - 'aaa/XXXXX'
+  #     - 'main'
+  #     # - 'feat/abdulmalik_20260325_ui_api_rework'
   workflow_dispatch:
 
 jobs:

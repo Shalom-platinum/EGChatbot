@@ -65,7 +65,7 @@ on:
 
 env:
   DOTNET_VERSION: ${{ github.event.inputs.dotnet_version }}
-  AZURE_WEBAPP_PACKAGE_PATH: './publish'
+  AZURE_WEBAPP_PACKAGE_PATH: ./src-net/publish
 
 jobs:
   build:
@@ -108,7 +108,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: reliance-lms-app
+          name: ${{ github.event.inputs.azure_app_service_name }}
           path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
   security-scan:
@@ -184,7 +184,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: reliance-lms-app
+          name: ${{ github.event.inputs.azure_app_service_name }}
           path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
       - name: Login to Azure
@@ -220,7 +220,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: reliance-lms-app
+          name: ${{ github.event.inputs.azure_app_service_name }}
           path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
       - name: Login to Azure

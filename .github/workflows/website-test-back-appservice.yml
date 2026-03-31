@@ -2,14 +2,14 @@ name: Azure App Services - Eyemasters API (TEST)
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - "main"
-      - 'AAA/**'
-  pull_request:
-    branches:
-      - "XXX"
-      - 'AAA/**'
+  # push:
+  #   branches:
+  #     - "main"
+  #     - 'AAA/**'
+  # pull_request:
+  #   branches:
+  #     - "XXX"
+  #     - 'AAA/**'
 
 jobs:
   build-and-deploy:
