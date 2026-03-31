@@ -239,7 +239,8 @@ jobs:
 
       - name: Azure logout
         run: az logout
-        if: always()
+        if: false
+        #always()
 
   notify-on-failure:
     name: Notify on Failure
