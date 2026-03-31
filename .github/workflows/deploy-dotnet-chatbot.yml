@@ -233,7 +233,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ github.event.inputs.azure_app_service_name }}
-          resource-group-name: ${{ github.event.inputs.azure_resource_group }}
+          # resource-group-name: ${{ github.event.inputs.azure_resource_group }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
